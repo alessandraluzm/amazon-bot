@@ -21,7 +21,6 @@ def main():
     # buscar o nome da lista de desejos
     print(soup.find('span', id='profile-list-name').text)
 
-
     dicionario = {}
     for div in soup.find_all('div', class_="a-text-left a-fixed-left-grid-col g-item-sortable-padding a-col-right"):
         titulo = div.find("a", class_="a-link-normal a-declarative").text
@@ -29,6 +28,20 @@ def main():
         dicionario[titulo] = valor
 
     print(dicionario)
+
+    with open('dicionario.json','r', encoding='utf8') as f:
+        leitura = f.read()
+        import json
+        dicionario_anterior = json.loads(leitura)
+        
+        for key, value in dicionario.items():
+            if dicionario[key] < dicionario_anterior[key]:
+                print('Value: {}'.format(value))
+    # carregar o dicionario antigo do arquivo
+    # iterar sobre os itens do dicionario antigo e comparar com o atual os preços
+    # se o preço atual for menor que o antigo, printar o livro
+
+
     with open('dicionario.json', 'w', encoding='utf8') as f:
         tarefa = f.write("mozao lindao")
         f.write("\nrick and morty rlz")
@@ -53,4 +66,4 @@ def leitura():
 
 
 if __name__ == '__main__':
-    leitura()
+    main()
