@@ -1,5 +1,7 @@
-from bs4 import BeautifulSoup
+import requests
+import sys
 
+from bs4 import BeautifulSoup
 
 def exemplo():
     wishlist = [
@@ -12,10 +14,14 @@ def exemplo():
     for tupla_da_wishlist in wishlist:
         print("Livro:{}  Preço:{}".format(tupla_da_wishlist[0], tupla_da_wishlist[1]))
 
-def main():
-    with open('wishlist.html', 'r', encoding='utf8') as wishlist_html:
-        document = wishlist_html.read()
 
+def main(usar_html_local=False):
+    if usar_html_local:
+        with open('wishlist.html', 'r', encoding='utf8') as wishlist_html:
+            document = wishlist_html.read()
+    else:
+        document = requests.get('https://www.amazon.com.br/gp/registry/wishlist/3I4247OZ2RR2W/ref=nav_wishlist_lists_1').text
+    
     soup = BeautifulSoup(document, 'html.parser')
 
     # buscar o nome da lista de desejos
@@ -68,4 +74,7 @@ def leitura():
 
 
 if __name__ == '__main__':
-    main()
+    usar_html_local = False
+    if len(sys.argv) > 1:
+        usar_html_local = bool(sys.argv[1])
+    main(usar_html_local)
