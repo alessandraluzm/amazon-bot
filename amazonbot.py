@@ -9,21 +9,17 @@ from bs4 import BeautifulSoup
 from email.mime.text import MIMEText
 
 
-WISHLIST_URL = 'https://www.amazon.com.br/gp/registry/wishlist/3I4247OZ2RR2W/'
+WISHLIST_URLS = [
+    'https://www.amazon.com.br/gp/registry/wishlist/3I4247OZ2RR2W/',
+    'https://www.amazon.com.br/hz/wishlist/ls/3I4247OZ2RR2W?filter=DEFAULT&sort=default&lek=14c69328-8089-4ce7-a761-34d3bec548ee&type=wishlist&ajax=false',
+    'https://www.amazon.com.br/hz/wishlist/ls/3I4247OZ2RR2W?filter=DEFAULT&sort=default&lek=11f37f9a-507e-44c3-92d6-46c339c97a3b&type=wishlist&ajax=false',
+    'https://www.amazon.com.br/hz/wishlist/ls/3I4247OZ2RR2W?filter=DEFAULT&sort=default&lek=8ef4057f-d071-4545-bcae-abace77ba96c&type=wishlist&ajax=false'
+]
 
 
-def main(usar_html_local=False):
-    # Abertura da wishlist de teste para carregamento mais rápido
-    if usar_html_local:
-        with open('wishlist.html', 'r', encoding='utf8') as wishlist_html:
-            document = wishlist_html.read()
-    # Carregamento da página de Wishlist direto do site da Amazon
-    else:
-        document = requests.get(WISHLIST_URL).text
-
-    soup = BeautifulSoup(document, 'html.parser')
-
+def preencher_dicionario(document):
     # Criação do dicionário contendo os títulos e preços dos livros
+    soup = BeautifulSoup(document, 'html.parser')
     dicionario = {}
     for div in soup.find_all('div', class_="a-text-left a-fixed-left-grid-col g-item-sortable-padding a-col-right"):
         titulo = div.find("a", class_="a-link-normal a-declarative").text
@@ -43,6 +39,22 @@ def main(usar_html_local=False):
             dicionario[titulo] = {}
             dicionario[titulo] = {'string': None}
             dicionario[titulo]['inteiro'] = None
+    return dicionario
+
+
+def main(usar_html_local=False):
+    # Abertura da wishlist de teste para carregamento mais rápido
+    if usar_html_local:
+        with open('wishlist.html', 'r', encoding='utf8') as wishlist_html:
+            document = wishlist_html.read()
+            dicionario = preencher_dicionario(document)
+    # Chama a função que preenche o dicionário e adiciona o conteúdo de todos os links da wishlist salvos dentro de WISHLIST_URLS
+    else:
+        dicionario = {}
+        for link in WISHLIST_URLS:
+            document = requests.get(link).text
+            dicionario_funcao = preencher_dicionario(document)
+            dicionario.update(dicionario_funcao)
 
     # Comparação dos preços antigos do arquivo JSON com os novos que vêm da página da Wishlist
     # Após a comparação, envia um e-mail de acordo com a situação do produto
