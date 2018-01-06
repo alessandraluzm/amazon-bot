@@ -1,5 +1,9 @@
 import requests
 import sys
+import smtplib
+import local
+
+from email.mime.text import MIMEText
 
 from bs4 import BeautifulSoup
 
@@ -46,10 +50,19 @@ def main(usar_html_local=False):
         import json
         dicionario_anterior = json.loads(leitura)
         
-        for key, value in dicionario.items():
-            if key in dicionario_anterior:
-                if dicionario[key]['inteiro'] < dicionario_anterior[key]['inteiro']:
-                    print('Value: {}'.format(dicionario[key]['inteiro']))
+        for titulo, value in dicionario.items():
+            if titulo in dicionario_anterior:
+                if dicionario[titulo]['inteiro'] < dicionario_anterior[titulo]['inteiro']:
+                    email = MIMEText("Houve alteração de preço no livro {} de {} para {}".format(titulo, dicionario_anterior[titulo]['string'], dicionario[titulo]['string']))
+                    email['Subject'] = 'Amazon Bot'
+                    email['From'] = 'Amazon Bot <carteiro@sitedoicaro.not.br>'
+                    email['To'] = 'aledskywalker@gmail.com'
+
+                    s = smtplib.SMTP(host='smtp.gmail.com', port=587)
+                    s.starttls()  # transforma em conexão segura
+                    s.login(local.SMTP_USER,local.SMTP_PASSWORD)
+                    s.send_message(email)
+                    s.quit()
     # carregar o dicionario antigo do arquivo
     # iterar sobre os itens do dicionario antigo e comparar com o atual os preços
     # se o preço atual for menor que o antigo, printar o livro
