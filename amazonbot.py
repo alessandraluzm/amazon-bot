@@ -58,8 +58,9 @@ def main(usar_html_local=False):
 
     # Comparação dos preços antigos do arquivo JSON com os novos que vêm da página da Wishlist
     # Após a comparação, envia um e-mail de acordo com a situação do produto
-    with open('dicionario.json','r', encoding='utf8') as arquivo_wishlist_json:
-        dicionario_anterior = json.loads(arquivo_wishlist_json.read()) # carrega o arquivo JSON e transforma no dicionário
+    with open('dicionario.json','a+', encoding='utf8') as arquivo_wishlist_json:
+        arquivo_wishlist_json.seek(0)  # volta o ponteiro do arquivo para o incício para poder ler pois o modo 'a' inicia no final
+        dicionario_anterior = json.loads(arquivo_wishlist_json.read() or '{}') # carrega o arquivo JSON (com o valor padrão caso o arquivo esteja vazio) e transforma no dicionário
         for titulo, _ in dicionario.items():
             if titulo in dicionario_anterior:
                 # Se um produto retornar ao estoque, notifica por e-mail
