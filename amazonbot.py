@@ -27,13 +27,13 @@ def main(usar_html_local=False):
     else:
         #document = requests.get('https://www.amazon.com.br/gp/registry/wishlist/3I4247OZ2RR2W/ref=nav_wishlist_lists_1').text
         document = requests.get('https://www.amazon.com.br/hz/wishlist/ls/3I4247OZ2RR2W?filter=DEFAULT&sort=default&lek=11f37f9a-507e-44c3-92d6-46c339c97a3b&type=wishlist&ajax=false').text
-    
+
     soup = BeautifulSoup(document, 'html.parser')
 
     # buscar o nome da lista de desejos
     print(soup.find('span', id='profile-list-name').text)
 
-    dicionario = {} 
+    dicionario = {}
     for div in soup.find_all('div', class_="a-text-left a-fixed-left-grid-col g-item-sortable-padding a-col-right"):
         titulo = div.find("a", class_="a-link-normal a-declarative").text
         valor = div.find("span", class_="a-offscreen")
@@ -55,10 +55,9 @@ def main(usar_html_local=False):
 
     with open('dicionario.json','r', encoding='utf8') as f:
         leitura = f.read()
-        import json
         dicionario_anterior = json.loads(leitura)
         
-        for titulo, value in dicionario.items():
+        for titulo, _ in dicionario.items():
             if titulo in dicionario_anterior:
                 if dicionario[titulo]['inteiro'] is not None and dicionario_anterior[titulo]['inteiro'] is None:
                     email = MIMEText("O livro {} está disponível no estoque novamente.".format(titulo))
@@ -93,7 +92,6 @@ def leitura():
     with open('dicionario.json', 'r') as f:
         s = f.read()
 
-    import json 
     dicionario = json.loads(s)
     print(dicionario)
     # dictionary & json: salvar a lista de livros e seus valores em um arquivo com um dicionario serializado no formato json
