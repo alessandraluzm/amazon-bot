@@ -1,3 +1,4 @@
 env/*
 local.py
 __pycache__/*
+*.json

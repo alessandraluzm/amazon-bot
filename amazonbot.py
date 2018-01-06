@@ -2,6 +2,7 @@ import requests
 import sys
 import smtplib
 import local
+import json
 
 from email.mime.text import MIMEText
 
@@ -24,7 +25,8 @@ def main(usar_html_local=False):
         with open('wishlist.html', 'r', encoding='utf8') as wishlist_html:
             document = wishlist_html.read()
     else:
-        document = requests.get('https://www.amazon.com.br/gp/registry/wishlist/3I4247OZ2RR2W/ref=nav_wishlist_lists_1').text
+        #document = requests.get('https://www.amazon.com.br/gp/registry/wishlist/3I4247OZ2RR2W/ref=nav_wishlist_lists_1').text
+        document = requests.get('https://www.amazon.com.br/hz/wishlist/ls/3I4247OZ2RR2W?filter=DEFAULT&sort=default&lek=11f37f9a-507e-44c3-92d6-46c339c97a3b&type=wishlist&ajax=false').text
     
     soup = BeautifulSoup(document, 'html.parser')
 
@@ -34,14 +36,20 @@ def main(usar_html_local=False):
     dicionario = {} 
     for div in soup.find_all('div', class_="a-text-left a-fixed-left-grid-col g-item-sortable-padding a-col-right"):
         titulo = div.find("a", class_="a-link-normal a-declarative").text
-        valor = div.find("span", class_="a-offscreen").text
-        novo_valor = valor.split('R$ ')[1]
-        novo_valor = novo_valor.replace(',', '.')
-        novo_valor = float(novo_valor)
-        print(novo_valor)
-        dicionario[titulo] = {}
-        dicionario[titulo]={'string': valor}
-        dicionario[titulo]['inteiro']= novo_valor        
+        valor = div.find("span", class_="a-offscreen")
+        if valor is not None:
+            valor = div.find("span", class_="a-offscreen").text
+            novo_valor = valor.split('R$ ')[1]
+            novo_valor = novo_valor.replace(',', '.')
+            novo_valor = float(novo_valor)
+            dicionario[titulo] = {}
+            dicionario[titulo]={'string': valor}
+            dicionario[titulo]['inteiro']= novo_valor
+        else:
+            novo_valor = None
+            dicionario[titulo] = {}
+            dicionario[titulo] = {'string': None}
+            dicionario[titulo]['inteiro'] = novo_valor
         
     print(dicionario)
 
@@ -52,7 +60,19 @@ def main(usar_html_local=False):
         
         for titulo, value in dicionario.items():
             if titulo in dicionario_anterior:
-                if dicionario[titulo]['inteiro'] < dicionario_anterior[titulo]['inteiro']:
+                if dicionario[titulo]['inteiro'] is not None and dicionario_anterior[titulo]['inteiro'] is None:
+                    email = MIMEText("O livro {} está disponível no estoque novamente.".format(titulo))
+                    email['Subject'] = 'Amazon Bot'
+                    email['From'] = 'Amazon Bot <carteiro@sitedoicaro.not.br>'
+                    email['To'] = 'aledskywalker@gmail.com'
+
+                    s = smtplib.SMTP(host='smtp.gmail.com', port=587)
+                    s.starttls()  # transforma em conexão segura
+                    s.login(local.SMTP_USER,local.SMTP_PASSWORD)
+                    s.send_message(email)
+                    s.quit()
+
+                elif dicionario[titulo]['inteiro'] is not None and dicionario_anterior[titulo]['inteiro'] is not None and dicionario[titulo]['inteiro'] < dicionario_anterior[titulo]['inteiro']:
                     email = MIMEText("Houve alteração de preço no livro {} de {} para {}".format(titulo, dicionario_anterior[titulo]['string'], dicionario[titulo]['string']))
                     email['Subject'] = 'Amazon Bot'
                     email['From'] = 'Amazon Bot <carteiro@sitedoicaro.not.br>'
@@ -63,18 +83,11 @@ def main(usar_html_local=False):
                     s.login(local.SMTP_USER,local.SMTP_PASSWORD)
                     s.send_message(email)
                     s.quit()
-    # carregar o dicionario antigo do arquivo
-    # iterar sobre os itens do dicionario antigo e comparar com o atual os preços
-    # se o preço atual for menor que o antigo, printar o livro
 
-    with open('dicionario.json', 'r', encoding='utf8') as f:
-        a = f.read()
-        #print(a)
-
-        import json
-        s = json.dumps(dicionario, indent=2)
-        #with open('dicionario.json', 'w') as f:
-          #  f.write(s)
+    # Escreve o resultado da busca da Wishlist em um arquivo json local
+    resultado_wishlist_json = json.dumps(dicionario, indent=2)
+    with open('dicionario.json', 'w') as arquivo_wishlist_json:
+        arquivo_wishlist_json.write(resultado_wishlist_json)
 
 def leitura():
     with open('dicionario.json', 'r') as f:
