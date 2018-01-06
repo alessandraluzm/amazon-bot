@@ -1,23 +1,12 @@
-import requests
-import sys
-import smtplib
 import local
-import json
 
-from email.mime.text import MIMEText
+import json
+import requests
+import smtplib
+import sys
 
 from bs4 import BeautifulSoup
-
-def exemplo():
-    wishlist = [
-        ("Guerra e Paz", 59.90),
-        ("Ana Karerina", 80.00),
-        ("Revolução dos Bichos", 25.59)
-    ]
-    print(wishlist)
-    # percorrer a wishlist e fazer o print de cada item no formato: "Livro: Guerra e Paz - Preço: 25.90"
-    for tupla_da_wishlist in wishlist:
-        print("Livro:{}  Preço:{}".format(tupla_da_wishlist[0], tupla_da_wishlist[1]))
+from email.mime.text import MIMEText
 
 
 def main(usar_html_local=False):
@@ -50,8 +39,6 @@ def main(usar_html_local=False):
             dicionario[titulo] = {}
             dicionario[titulo] = {'string': None}
             dicionario[titulo]['inteiro'] = novo_valor
-        
-    print(dicionario)
 
     with open('dicionario.json','r', encoding='utf8') as f:
         leitura = f.read()
@@ -87,14 +74,6 @@ def main(usar_html_local=False):
     resultado_wishlist_json = json.dumps(dicionario, indent=2)
     with open('dicionario.json', 'w') as arquivo_wishlist_json:
         arquivo_wishlist_json.write(resultado_wishlist_json)
-
-def leitura():
-    with open('dicionario.json', 'r') as f:
-        s = f.read()
-
-    dicionario = json.loads(s)
-    print(dicionario)
-    # dictionary & json: salvar a lista de livros e seus valores em um arquivo com um dicionario serializado no formato json
 
 
 if __name__ == '__main__':
