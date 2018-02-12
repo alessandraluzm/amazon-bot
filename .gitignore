@@ -1,4 +1,10 @@
-env/*
-local.py
 __pycache__/*
+
 *.json
+*.pyc
+
+.idea/*
+
+env/*
+conf/*/server.py
+local.py
