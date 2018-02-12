@@ -1,0 +1,2 @@
+# Executa o Amazonbot toda a meia-noite
+10 0 * * * /home/ubuntu/sites/amazonbot/env/bin/python3 /home/ubuntu/sites/amazonbot/releases/current/amazonbot.py
